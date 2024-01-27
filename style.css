@@ -1,0 +1,36 @@
+canvas#canvas {
+    border: 1px solid black;
+}
+
+div.block {
+    border: 1px solid black;
+    width: fit-content;
+    padding: 10px;
+}
+div.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+div.configuration {
+    display: flex;
+    flex-direction:row;
+}
+
+div#lwidth_testbox {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+div#lwidth_test {
+    width: 5px;
+    height: 5px;
+    margin: 0 auto;
+    border-radius: 100%;
+    background-color: black;
+}

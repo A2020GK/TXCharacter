@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TXCharacter</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>TXCharacter</h1>
+        <p><i>Character editor for TXLib</i></p>
+        <canvas id="canvas" width="300" height="300">Your browser doesn't support HTML5.</canvas>
+        <noscript>
+            <p>Please enable JavaScript to use this tool.</p>
+        </noscript>
+        <div class="configuration">
+            <div class="block">
+                <p>Width: <input type="number" step="1" value="300" id="width" placeholder="W"></p>
+                <p>Height: <input type="number" step="1" id="height" value="300" placeholder="H"></p>
+            </div>
+
+            <div class="block">
+                <table width="40%" border="1">
+                    <tr>
+                        <th><label for="tool">Tool</label></th>
+                        <th><label for="color">Stroke color</label></th>
+                        <th><label for="fill_color">Fill color</label></th>
+                        <th><label for="color_sync">Sync colors</label></th>
+                        <th colspan="3"><label for="lwidth">Line width</label></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="tool" value="line">
+                                <option value="line">Line</option>
+                            </select>
+                        </td>
+                        <td><input type="color" id="color" value="#000"></td>
+                        <td><input type="color" id="fill_color" value="#000"></td>
+                        <td><input type="checkbox" id="color_sync"></td>
+                        <td><input type="range" step="1" value="5" min="1" max="20" id="lwidth"></td>
+                        <td><div id="lwidth_testbox">
+                            <div id="lwidth_test"></div>
+                        </div></td>
+                        <td><output id="lwidth_value">5</output></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="block">
+            <p>Result: </p>
+            <p><textarea readonly id="output" cols="40" rows="20"><nououtput></textarea></p>
+        </div>
+    </div>
+</body>
+
+</html>
