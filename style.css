@@ -1,5 +1,6 @@
 canvas#canvas {
     border: 1px solid black;
+    image-rendering: pixelated;
 }
 
 div.block {
