@@ -8,12 +8,13 @@ div.block {
     width: fit-content;
     padding: 10px;
 }
+
 div.wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
+}
 
 
 div#lwidth_testbox {
@@ -25,6 +26,7 @@ div#lwidth_testbox {
     justify-content: center;
     padding: 5px;
 }
+
 div#lwidth_test {
     width: 5px;
     height: 5px;
@@ -32,6 +34,7 @@ div#lwidth_test {
     border-radius: 100%;
     background-color: black;
 }
+
 textarea {
     resize: none;
     word-wrap: none;
