@@ -18,6 +18,7 @@
         <noscript>
             <p>Please enable JavaScript to use this tool.</p>
         </noscript>
+        <p><i>Tip: Press Z to cancel current/remove latest primitive.</i></p>
         <div class="block">
             <p>Width: <input type="number" step="1" value="300" id="width" placeholder="W"></p>
             <p>Height: <input type="number" step="1" id="height" value="300" placeholder="H"></p>
@@ -37,6 +38,9 @@
                     <td>
                         <select id="tool" value="line">
                             <option value="line">Line</option>
+                            <option value="rectangle">Rectangle</option>
+                            <option value="basepoint">Basepoint selection</option>
+                            <option value="move">Move character</option>
                         </select>
                     </td>
                     <td><input type="color" id="color" value="#000"></td>
@@ -56,8 +60,9 @@
 
         <div class="block">
             <p><label for="name">Character name: </label><input id="name"></p>
+            <p><label for="prototype">Function prototype: </label> <textarea readonly id="prototype" cols="75" rows="1">Waiting for your actions...</textarea></p>
             <p><label for="output">Result: </label></p>
-            <p><textarea readonly id="output" cols="40" rows="20">Waiting for your actions...</textarea></p>
+            <p><textarea readonly id="output" cols="95" rows="20">Waiting for your actions...</textarea></p>
         </div>
     </div>
 </body>

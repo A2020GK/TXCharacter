@@ -32,3 +32,6 @@ div#lwidth_test {
     border-radius: 100%;
     background-color: black;
 }
+textarea {
+    resize: none;
+}
