@@ -303,9 +303,9 @@ function compile_rel_x(x) {
     else if (x < basepoint.x) return `x - ${compile_rel_num(basepoint.x - x)} * orrientationCof`;
 }
 function compile_rel_y(y) {
-    if (y > basepoint.y) return `y + ${compile_rel_num(y - basepoint.y)} * orrientationCof`;
+    if (y > basepoint.y) return `y + ${compile_rel_num(y - basepoint.y)}`;
     else if (y == basepoint.y) return "y";
-    else if (y < basepoint.y) return `y - ${compile_rel_num(basepoint.y - y)} * orrientationCof`;
+    else if (y < basepoint.y) return `y - ${compile_rel_num(basepoint.y - y)}`;
 }
 
 function compile_rel_num(number) {
