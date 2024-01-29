@@ -14,6 +14,8 @@ const tool=document.getElementById("tool");
 const character_name=document.getElementById("name");
 const output_code=document.getElementById("output");
 const prototype_code=document.getElementById("prototype");
+const save_btn=document.getElementById("save_btn");
+const load_f=document.getElementById("load");
 
 // Function to add 1 event listener at multiple objects
 const multipleEventListener=(elements,event,listener)=>elements.forEach(element=>element.addEventListener(event,listener));
@@ -80,6 +82,10 @@ fill_color_tr.addEventListener("change",function(event) {
 let current_object=null;
 let objects=[];
 let mouse_pressed=false;
+let basepoint={
+    x:canvas.width/2,
+    y:canvas.height/2
+}
 
 // ==== Classes (Primitives, etc) ====
 
@@ -177,6 +183,34 @@ class Rectangle extends Primitive {
     }
 }
 
+class Circle extends Primitive {
+    constructor(x,y,color,fill_color,line_width) {
+        super(color,fill_color,line_width);
+
+        this.x=x;
+        this.y=y;
+        this.radius=0;
+    }
+    render(ctx) {
+        super.render(ctx);
+        
+        ctx.beginPath();
+
+        ctx.arc(this.x,this.y,this.radius,0,2*Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
+    compile() {
+        let c=super.compile();
+        c+=`    txCircle(${compile_rel_x(this.x)}, ${compile_rel_y(this.y)}, ${compile_rel_num(this.radius)});\r\n`;
+
+        return c;
+    }
+    move(xof,yof) {
+        this.x+=xof;
+        this.y+=yof;
+    }
+}
 
 // ==== App code ====
 
@@ -190,21 +224,94 @@ function relativeCords(mouseEvent) {
     return {x:Math.floor(x),y:Math.floor(y)};
 }
 
-let basepoint={
-    x:canvas.width/2,
-    y:canvas.height/2
+
+function binaryEncode(string) {
+    const codeUnits = new Uint16Array(string.length);
+    for (let i = 0; i < codeUnits.length; i++) {
+      codeUnits[i] = string.charCodeAt(i);
+    }
+    return btoa(String.fromCharCode(...new Uint8Array(codeUnits.buffer)));
+}
+
+function binaryDecode(encoded) {
+    const binary = atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return String.fromCharCode(...new Uint16Array(bytes.buffer));
+}
+
+function exportData() {
+    let data={
+        basepoint:basepoint,
+        objects:[],
+        name:character_name.value,
+        width:canvas.width,
+        height:canvas.height
+    }
+
+    objects.forEach(element=>{
+        data.objects.push({
+            type:element.constructor.name,
+            properties:element
+        })
+    });
+    return binaryEncode(JSON.stringify(data));
+}
+
+function downloadFile(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+function importData(dt) {
+    let data=JSON.parse(binaryDecode(dt));
+    basepoint=data.basepoint;
+    
+    objects=[];
+    data.objects.forEach(element=>{
+        let obj=eval(`new ${element.type}()`);
+        for(let key in element.properties) {
+            obj[key]=element.properties[key];
+        }
+        objects.push(obj);
+    });
+
+    character_name.value=data.name;
+    canvas.width=data.width;
+    canvas.height=data.height;
+
+    width.value=canvas.width;
+    height.value=canvas.height;
+
+    render();
+    compile_element();
 }
 
 function compile_rel_x(x) {
-    if(x>basepoint.x) return `x + ${x-basepoint.x}`;
+    if(x>basepoint.x) return `x + ${compile_rel_num(x-basepoint.x)} * orrientationCof`;
     else if(x==basepoint.x) return "x";
-    else if(x<basepoint.x) return `x - ${basepoint.x-x}`;
+    else if(x<basepoint.x) return `x - ${compile_rel_num(basepoint.x-x)} * orrientationCof`;
 }
 function compile_rel_y(y) {
-    if(y>basepoint.y) return `y + ${y-basepoint.y}`;
+    if(y>basepoint.y) return `y + ${compile_rel_num(y-basepoint.y)} * orrientationCof`;
     else if(y==basepoint.y) return "y";
-    else if(y<basepoint.y) return `y - ${basepoint.y-y}`;
+    else if(y<basepoint.y) return `y - ${compile_rel_num(basepoint.y-y)} * orrientationCof`;
 }
+
+function compile_rel_num(number) {
+    return `${number} * scale`;
+}
+
 
 function render() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -226,13 +333,21 @@ function render() {
 }
 
 function hexToRgb(hex) {
-    if(fill_color_tr.checked) return "transparent";
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
+}
+
+function getStrokeColor() {
+    return hexToRgb(stroke_color.value);
+}
+
+function getFillColor() {
+    if(fill_color_tr.checked) return "transparent";
+    return hexToRgb(fill_color.value);
 }
 
 function compile() {
@@ -250,6 +365,13 @@ function compile() {
 
     return [c,cp];
 }
+
+function getDistance(x1, y1, x2, y2) {
+    var xDiff = x2 - x1;
+    var yDiff = y2 - y1;
+  
+    return Math.floor(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
+  }
 
 function compile_element() {
     let comp=compile();
@@ -271,14 +393,20 @@ canvas.addEventListener("mousemove",function(event) {
             if(tool.value=="line") current_object=new Line(
                 cords.x,
                 cords.y,
-                hexToRgb(stroke_color.value),
-                hexToRgb(fill_color.value),
+                getStrokeColor(),
+                getFillColor(),
                 line_width.value
             ); else if(tool.value=="rectangle") current_object=new Rectangle(
                 cords.x,
                 cords.y,
-                hexToRgb(stroke_color.value),
-                hexToRgb(fill_color.value),
+                getStrokeColor(),
+                getFillColor(),
+                line_width.value
+            ); else if(tool.value=="circle") current_object=new Circle(
+                cords.x,
+                cords.y,
+                getStrokeColor(),
+                getFillColor(),
                 line_width.value
             );
 
@@ -291,6 +419,8 @@ canvas.addEventListener("mousemove",function(event) {
             } else if(current_object instanceof Rectangle) {
                 current_object.xe=cords.x;
                 current_object.ye=cords.y;
+            } else if(current_object instanceof Circle) {
+                current_object.radius=getDistance(current_object.x,current_object.y,cords.x,cords.y);
             }
         }
     } else {
@@ -323,6 +453,23 @@ canvas.addEventListener("click",function(event) {
         render();
         compile();
     }
+});
+
+
+save_btn.addEventListener("click",function(event) {
+    downloadFile(`character_${character_name.value}.txc`,exportData());
+});
+
+load_f.addEventListener("change",function(event) {
+    const file=event.target.files[0];
+    const reader=new FileReader();
+    reader.readAsText(file,"utf-8");
+    reader.addEventListener("load",function(event) {
+        importData(event.target.result);
+    });
+    reader.addEventListener("error",function(event) {
+        alert("Что-то пошло не так...");
+    });
 });
 
 render();

@@ -34,4 +34,5 @@ div#lwidth_test {
 }
 textarea {
     resize: none;
+    word-wrap: none;
 }
