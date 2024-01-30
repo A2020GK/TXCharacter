@@ -93,7 +93,7 @@ class Primitive {
     constructor(color, fill_color, line_width) {
         this.color = color;
         this.fill_color = fill_color;
-        this.line_width = line_width;
+        this.line_width = Number(line_width);
         this.name = "<unnamed>";
     }
     render(ctx) {
@@ -210,6 +210,81 @@ class Circle extends Primitive {
     }
 }
 
+class Polygon extends Primitive {
+    static polygons = -1;
+    constructor(xb, yb, color, fill_color, line_width) {
+        super(color, fill_color, line_width);
+        this.points = [];
+        this.points.push([xb, yb]);
+        this.closed = false;
+        this.points.push([xb, yb]);
+        Polygon.polygons++;
+        this.id = Polygon.polygons;
+    }
+    addPoint(x, y) {
+        this.points.push([x, y]);
+
+        let last_point = this.points[this.points.length - 1];
+        let first_point = this.points[0];
+
+        // Logics
+        // xb-2.5 < x < xb+2.5
+        // yb-2.5 < y < yb+2.5
+        let cof = this.line_width / 2 + 2.5;
+        let cond_x = ((first_point[0] - cof) < last_point[0]) && (last_point[0] < (first_point[0] + cof));
+        let cond_y = ((first_point[1] - cof) < last_point[1]) && (last_point[1] < (first_point[1] + cof));
+        let cond = cond_x && cond_y;
+
+        if (cond) {
+            this.points.pop();
+            this.points.pop();
+            this.closed = true;
+        }
+    }
+    render(ctx) {
+        super.render(ctx);
+        ctx.beginPath();
+        ctx.moveTo(this.points[0][0], this.points[0][1]);
+
+        this.points.slice(1).forEach(point => ctx.lineTo(point[0], point[1]));
+
+        if (this.closed) ctx.closePath();
+
+        ctx.stroke();
+        ctx.fill();
+
+        if (!this.closed) {
+            ctx.fillStyle = "rgb(192, 192, 192, 0.9)";
+            ctx.beginPath();
+            ctx.arc(this.points[0][0], this.points[0][1], this.line_width + 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+    }
+    compile() {
+        let c = super.compile();
+
+        c += `    POINT polygon${this.id}[${this.points.length}] = {`;
+        this.points.forEach((point, index) => {
+            c += `{${compile_rel_x(point[0], true)}, ${compile_rel_y(point[1], true)}}`;
+            if (index < this.points.length - 1) c += ", ";
+        });
+
+        c += "};\r\n";
+
+        c += `    txPolygon(polygon${this.id}, ${this.points.length});\r\n`;
+
+        return c;
+    }
+    move(xof, yof) {
+        let npoints = []
+        this.points.forEach(point => {
+            npoints.push([point[0] + xof, point[1] + yof]);
+        });
+        this.points = npoints;
+    }
+}
+
 // ==== App code ====
 
 canvas.addEventListener("mousedown", event => mouse_pressed = true);
@@ -295,15 +370,15 @@ function importData(dt) {
     compile_element();
 }
 
-function compile_rel_x(x) {
-    if (x > basepoint.x) return `x + ${compile_rel_num(x - basepoint.x)} * orrientationCof`;
-    else if (x == basepoint.x) return "x";
-    else if (x < basepoint.x) return `x - ${compile_rel_num(basepoint.x - x)} * orrientationCof`;
+function compile_rel_x(x, longmode = false) {
+    if (x > basepoint.x) return `${longmode ? "(long)(" : ""}x + ${compile_rel_num(x - basepoint.x)} * orrientationCof${longmode ? ")" : ""}`;
+    else if (x == basepoint.x) return `${longmode ? "(long)" : ""}x`;
+    else if (x < basepoint.x) return `${longmode ? "(long)(" : ""}x - ${compile_rel_num(basepoint.x - x)} * orrientationCof${longmode ? ")" : ""}`;
 }
-function compile_rel_y(y) {
-    if (y > basepoint.y) return `y + ${compile_rel_num(y - basepoint.y)}`;
-    else if (y == basepoint.y) return "y";
-    else if (y < basepoint.y) return `y - ${compile_rel_num(basepoint.y - y)}`;
+function compile_rel_y(y, longmode = false) {
+    if (y > basepoint.y) return `${longmode ? "(long)(" : ""}y + ${compile_rel_num(y - basepoint.y)}${longmode ? ")" : ""}`;
+    else if (y == basepoint.y) return `${longmode ? "(long)" : ""}y`;
+    else if (y < basepoint.y) return `${longmode ? "(long)(" : ""}y - ${compile_rel_num(basepoint.y - y)}${longmode ? ")" : ""}`;
 }
 
 function compile_rel_num(number) {
@@ -423,9 +498,14 @@ canvas.addEventListener("mousemove", function (event) {
         }
     } else {
         if (current_object != null) {
-            let name = prompt("Enter this primitive name: ");
-            if (!(name == "" || name == null)) current_object.name = name;
-            current_object = null;
+            if (!(current_object instanceof Polygon)) {
+                let name = prompt("Enter this primitive name: ");
+                if (!(name == "" || name == null)) current_object.name = name;
+                current_object = null;
+            } else {
+                current_object.points[current_object.points.length - 1][0] = cords.x;
+                current_object.points[current_object.points.length - 1][1] = cords.y;
+            }
         }
     }
     render();
@@ -448,9 +528,28 @@ canvas.addEventListener("click", function (event) {
     const cords = relativeCords(event);
     if (tool.value == "basepoint") {
         basepoint = cords;
-        render();
-        compile();
     }
+    if (current_object == null) {
+        if (tool.value == "polygon") current_object = new Polygon(
+            cords.x,
+            cords.y,
+            getStrokeColor(),
+            getFillColor(),
+            line_width.value
+        );
+        if (current_object != null) objects.push(current_object);
+    } else {
+        if (current_object instanceof Polygon) {
+            current_object.addPoint(cords.x, cords.y);
+            if (current_object.closed) {
+                let name = prompt("Enter this primitive name: ");
+                if (!(name == "" || name == null)) current_object.name = name;
+                current_object = null;
+            }
+        }
+    }
+    render();
+    compile();
 });
 
 
