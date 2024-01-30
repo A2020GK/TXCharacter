@@ -221,6 +221,7 @@ class Polygon extends Primitive {
         Polygon.polygons++;
         this.id = Polygon.polygons;
     }
+    
     addPoint(x, y) {
         this.points.push([x, y]);
 
@@ -517,7 +518,8 @@ document.addEventListener("keypress", function (event) {
     const code = event.code;
 
     if (code == "KeyZ") {
-        objects.pop();
+        let removed=objects.pop();
+        if(removed instanceof Polygon) Polygon.polygons--;
         current_object = null;
     }
     render();
