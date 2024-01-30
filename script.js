@@ -95,8 +95,6 @@ class Primitive {
         this.fill_color = fill_color;
         this.line_width = line_width;
         this.name = "<unnamed>";
-        this.bx = 0;
-        this.by = 0;
     }
     render(ctx) {
         ctx.lineCap = "round";
