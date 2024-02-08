@@ -1,41 +1,144 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
 canvas#canvas {
     border: 1px solid black;
     image-rendering: pixelated;
+    max-width: 100%;
+    height: auto;
 }
 
 div.block {
     border: 1px solid black;
-    width: fit-content;
-    padding: 10px;
+    background-color: #fff;
+    padding: 20px;
+    margin: 5px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 div.wrapper {
+    max-width: 1200px;
+    padding: 20px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 0;
+}
+
+p {
+    margin: 10px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+input[type="number"] {
+    width: 50px;
+}
+
+input[type="color"] {
+    padding: 3px;
+}
+
+input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+input[type="range"] {
+    width: 100%;
+}
+
+#lwidth_testbox {
+    width: 30px;
+    height: 30px;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-
-div#lwidth_testbox {
-    width: 25px;
-    height: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-}
-
-div#lwidth_test {
+#lwidth_test {
     width: 5px;
     height: 5px;
-    margin: 0 auto;
-    border-radius: 100%;
+    border-radius: 50%;
     background-color: black;
 }
 
 textarea {
     resize: none;
     word-wrap: none;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+input[type="file"] {
+    padding: 10px;
+    margin: 0;
+}
+
+footer {
+    background-color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+label[for="prototype"] {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+textarea#prototype {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
 }
