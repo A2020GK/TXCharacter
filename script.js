@@ -16,6 +16,8 @@ const output_code = document.getElementById("output");
 const prototype_code = document.getElementById("prototype");
 const save_btn = document.getElementById("save_btn");
 const load_f = document.getElementById("load");
+const x_cord=document.getElementById("xp");
+const y_cord=document.getElementById("yp");
 
 // Function to add 1 event listener at multiple objects
 const multipleEventListener = (elements, event, listener) => elements.forEach(element => element.addEventListener(event, listener));
@@ -457,6 +459,8 @@ const move = (x, y) => objects.forEach(element => element.move(x, y));
 
 canvas.addEventListener("mousemove", function (event) {
     const cords = relativeCords(event);
+    x_cord.innerHTML=cords.x;
+    y_cord.innerHTML=cords.y;
     if (mouse_pressed) {
         if (tool.value == "basepoint") {
             basepoint = cords;
