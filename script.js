@@ -16,8 +16,8 @@ const output_code = document.getElementById("output");
 const prototype_code = document.getElementById("prototype");
 const save_btn = document.getElementById("save_btn");
 const load_f = document.getElementById("load");
-const x_cord=document.getElementById("xp");
-const y_cord=document.getElementById("yp");
+const x_cord = document.getElementById("xp");
+const y_cord = document.getElementById("yp");
 
 // Function to add 1 event listener at multiple objects
 const multipleEventListener = (elements, event, listener) => elements.forEach(element => element.addEventListener(event, listener));
@@ -161,8 +161,8 @@ class Rectangle extends Primitive {
     }
     render(ctx) {
         super.render(ctx);
-        ctx.strokeRect(this.xb, this.yb, this.xe - this.xb, this.ye - this.yb);
         ctx.fillRect(this.xb, this.yb, this.xe - this.xb, this.ye - this.yb);
+        ctx.strokeRect(this.xb, this.yb, this.xe - this.xb, this.ye - this.yb);
     }
     compile() {
         let c = super.compile();
@@ -212,6 +212,46 @@ class Circle extends Primitive {
     }
 }
 
+class Ellipse extends Primitive {
+    constructor(xb, yb, color, fill_color, line_width) {
+        super(color, fill_color, line_width);
+
+        this.xb = xb;
+        this.yb = yb;
+
+        this.xe = xb;
+        this.yb = yb;
+    }
+    render(ctx) {
+
+        let xb = this.xb;
+        let yb = this.yb;
+        let xe = this.xe;
+        let ye = this.ye;
+
+        super.render(ctx);
+        const centerX = (xb + xe) / 2;
+        const centerY = (yb + ye) / 2;
+        const radiusX = Math.abs((xe - xb) / 2);
+        const radiusY = Math.abs((ye - yb) / 2);
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+    }
+    compile() {
+        let c = super.compile();
+        c += `    txEllipse(`;
+        c += `${compile_rel_x(this.xb)}, `;
+        c += `${compile_rel_y(this.yb)}, `;
+        c += `${compile_rel_x(this.xe)}, `
+        c += `${compile_rel_y(this.ye)});\r\n`;
+
+        return c;
+    }
+}
+
 class Polygon extends Primitive {
     static polygons = -1;
     constructor(xb, yb, color, fill_color, line_width) {
@@ -223,7 +263,7 @@ class Polygon extends Primitive {
         Polygon.polygons++;
         this.id = Polygon.polygons;
     }
-    
+
     addPoint(x, y) {
         this.points.push([x, y]);
 
@@ -459,8 +499,8 @@ const move = (x, y) => objects.forEach(element => element.move(x, y));
 
 canvas.addEventListener("mousemove", function (event) {
     const cords = relativeCords(event);
-    x_cord.innerHTML=cords.x;
-    y_cord.innerHTML=cords.y;
+    x_cord.innerHTML = cords.x;
+    y_cord.innerHTML = cords.y;
     if (mouse_pressed) {
         if (tool.value == "basepoint") {
             basepoint = cords;
@@ -486,7 +526,13 @@ canvas.addEventListener("mousemove", function (event) {
                 getStrokeColor(),
                 getFillColor(),
                 line_width.value
-            );
+            ); else if(tool.value=="ellipse") current_object=new Ellipse(
+                cords.x,
+                cords.y,
+                getStrokeColor(),
+                getFillColor(),
+                line_width.value
+            )
 
 
             if (current_object != null) objects.push(current_object);
@@ -499,6 +545,9 @@ canvas.addEventListener("mousemove", function (event) {
                 current_object.ye = cords.y;
             } else if (current_object instanceof Circle) {
                 current_object.radius = getDistance(current_object.x, current_object.y, cords.x, cords.y);
+            } else if(current_object instanceof Ellipse) {
+                current_object.xe=cords.x;
+                current_object.ye=cords.y;
             }
         }
     } else {
@@ -522,8 +571,8 @@ document.addEventListener("keypress", function (event) {
     const code = event.code;
 
     if (code == "KeyZ") {
-        let removed=objects.pop();
-        if(removed instanceof Polygon) Polygon.polygons--;
+        let removed = objects.pop();
+        if (removed instanceof Polygon) Polygon.polygons--;
         current_object = null;
     }
     render();
