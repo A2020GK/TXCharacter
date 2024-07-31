@@ -56,6 +56,30 @@ multipleEventListener([stroke_color, fill_color], "input", function (event) {
     }
 });
 
+const cursor={x:0,y:0,enabled:false,
+    move(xof,yof) {
+        this.enabled=true,
+        this.x+=xof;
+        this.y+=yof;
+
+        let event=new MouseEvent("mousemove");
+        event.relCords={x:this.x,y:this.y};
+        event.movementX=xof;
+        event.movementY=yof;
+        event.byCursor=true;
+
+        canvas.dispatchEvent(event);
+    },
+    click() {
+        this.enabled=true;
+
+        let event=new MouseEvent("click");
+        event.relCords={x:this.x,y:this.y};
+        event.byCursor=true;
+        canvas.dispatchEvent(event);
+    }
+};
+
 // Color sync checkbox handler
 // Logic: stroke -> fill
 color_sync.addEventListener("change", function (event) {
@@ -334,10 +358,12 @@ canvas.addEventListener("mousedown", event => mouse_pressed = true);
 canvas.addEventListener("mouseup", event => mouse_pressed = false);
 
 function relativeCords(mouseEvent) {
-    let rect = mouseEvent.target.getBoundingClientRect();
-    let x = mouseEvent.clientX - rect.left;
-    let y = mouseEvent.clientY - rect.top;
-    return { x: Math.floor(x), y: Math.floor(y) };
+    if(mouseEvent.relCords==undefined) {
+        let rect = mouseEvent.target.getBoundingClientRect();
+        let x = mouseEvent.clientX - rect.left;
+        let y = mouseEvent.clientY - rect.top;
+        mouseEvent.relCords={ x: Math.floor(x), y: Math.floor(y) };
+    }
 }
 
 
@@ -446,6 +472,20 @@ function render() {
     ctx.stroke();
 
     objects.forEach(element => element.render(ctx));
+
+    if(cursor.enabled) {
+        ctx.strokeStyle="black";
+        ctx.lineWidth = 1;
+        
+        ctx.beginPath();
+        ctx.moveTo(cursor.x-10,cursor.y);
+        ctx.lineTo(cursor.x+10,cursor.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cursor.x,cursor.y-10);
+        ctx.lineTo(cursor.x,cursor.y+10);
+        ctx.stroke();
+    }
 }
 
 function hexToRgb(hex) {
@@ -498,7 +538,14 @@ function compile_element() {
 const move = (x, y) => objects.forEach(element => element.move(x, y));
 
 canvas.addEventListener("mousemove", function (event) {
-    const cords = relativeCords(event);
+    relativeCords(event);
+    const cords=event.relCords;
+
+    cursor.x=cords.x;
+    cursor.y=cords.y;
+
+    if(!event.byCursor) cursor.enabled=false;
+
     x_cord.innerHTML = cords.x;
     y_cord.innerHTML = cords.y;
     if (mouse_pressed) {
@@ -575,9 +622,33 @@ document.addEventListener("keypress", function (event) {
         if (removed instanceof Polygon) Polygon.polygons--;
         current_object = null;
     }
+    if(code=="KeyW") {
+        if(cursor.y>0) cursor.move(0,-1);
+    }
+    if(code=="KeyS") {
+        if(cursor.y<canvas.height) cursor.move(0,1);
+    }
+    if(code=="KeyA") {
+        if(cursor.x>0) cursor.move(-1,0);
+    }
+    if(code=="KeyD") {
+        if(cursor.x<canvas.width) cursor.move(1,0);
+    }
+    if(code=="Enter") {
+        cursor.click();
+    }
     render();
     compile_element();
-})
+});
+
+document.addEventListener("keydown",function(event) {
+    const code=event.code;
+    if(code=="Enter") mouse_pressed=true;
+});
+document.addEventListener("keyup",function(event) {
+    const code=event.code;
+    if(code=="Enter") mouse_pressed=false;
+});
 
 canvas.addEventListener("click", function (event) {
     const cords = relativeCords(event);
@@ -604,9 +675,8 @@ canvas.addEventListener("click", function (event) {
         }
     }
     render();
-    compile();
+    compile_element();
 });
-
 
 save_btn.addEventListener("click", function (event) {
     downloadFile(`character_${character_name.value}.txc`, exportData());
@@ -620,7 +690,7 @@ load_f.addEventListener("change", function (event) {
         importData(event.target.result);
     });
     reader.addEventListener("error", function (event) {
-        alert("Что-то пошло не так...");
+        alert("Something went wrong...");
     });
 });
 

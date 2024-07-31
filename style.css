@@ -10,6 +10,7 @@ canvas#canvas {
     image-rendering: pixelated;
     max-width: 100%;
     height: auto;
+    cursor: crosshair;
 }
 
 div.block {
