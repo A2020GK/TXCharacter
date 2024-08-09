@@ -77,7 +77,7 @@ const cursor={x:0,y:0,enabled:false,
         event.relCords={x:this.x,y:this.y};
         event.byCursor=true;
         canvas.dispatchEvent(event);
-        alert(`${this.x}, ${this.y}`);
+        //alert(`${this.x}, ${this.y}`);
     }
 };
 
