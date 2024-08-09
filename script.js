@@ -77,6 +77,7 @@ const cursor={x:0,y:0,enabled:false,
         event.relCords={x:this.x,y:this.y};
         event.byCursor=true;
         canvas.dispatchEvent(event);
+        alert(`${this.x}, ${this.y}`);
     }
 };
 
@@ -358,12 +359,16 @@ canvas.addEventListener("mousedown", event => mouse_pressed = true);
 canvas.addEventListener("mouseup", event => mouse_pressed = false);
 
 function relativeCords(mouseEvent) {
-    if(mouseEvent.relCords==undefined) {
-        let rect = mouseEvent.target.getBoundingClientRect();
-        let x = mouseEvent.clientX - rect.left;
-        let y = mouseEvent.clientY - rect.top;
-        mouseEvent.relCords={ x: Math.floor(x), y: Math.floor(y) };
-    }
+    let rect = mouseEvent.target.getBoundingClientRect();
+    let x = mouseEvent.clientX - rect.left;
+    let y = mouseEvent.clientY - rect.top;
+    let cords={ x: Math.floor(x), y: Math.floor(y) };
+    return cords;
+}
+
+function relativeCordsApply(event) {
+    let cords = relativeCords(event);
+    if(event.relCords==undefined) event.relCords=cords;
 }
 
 
@@ -417,8 +422,8 @@ function downloadFile(filename, text) {
 
 function importData(dt) {
     let data = JSON.parse(binaryDecode(dt));
+    
     basepoint = data.basepoint;
-
     objects = [];
     data.objects.forEach(element => {
         let obj = eval(`new ${element.type}()`);
@@ -538,7 +543,7 @@ function compile_element() {
 const move = (x, y) => objects.forEach(element => element.move(x, y));
 
 canvas.addEventListener("mousemove", function (event) {
-    relativeCords(event);
+    relativeCordsApply(event);
     const cords=event.relCords;
 
     cursor.x=cords.x;
