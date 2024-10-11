@@ -56,26 +56,27 @@ multipleEventListener([stroke_color, fill_color], "input", function (event) {
     }
 });
 
-const cursor={x:0,y:0,enabled:false,
-    move(xof,yof) {
-        this.enabled=true,
-        this.x+=xof;
-        this.y+=yof;
+const cursor = {
+    x: 0, y: 0, enabled: false,
+    move(xof, yof) {
+        this.enabled = true,
+            this.x += xof;
+        this.y += yof;
 
-        let event=new MouseEvent("mousemove");
-        event.relCords={x:this.x,y:this.y};
-        event.movementX=xof;
-        event.movementY=yof;
-        event.byCursor=true;
+        let event = new MouseEvent("mousemove");
+        event.relCords = { x: this.x, y: this.y };
+        event.movementX = xof;
+        event.movementY = yof;
+        event.byCursor = true;
 
         canvas.dispatchEvent(event);
     },
     click() {
-        this.enabled=true;
+        this.enabled = true;
 
-        let event=new MouseEvent("click");
-        event.relCords={x:this.x,y:this.y};
-        event.byCursor=true;
+        let event = new MouseEvent("click");
+        event.relCords = { x: this.x, y: this.y };
+        event.byCursor = true;
         canvas.dispatchEvent(event);
         //alert(`${this.x}, ${this.y}`);
     }
@@ -362,13 +363,13 @@ function relativeCords(mouseEvent) {
     let rect = mouseEvent.target.getBoundingClientRect();
     let x = mouseEvent.clientX - rect.left;
     let y = mouseEvent.clientY - rect.top;
-    let cords={ x: Math.floor(x), y: Math.floor(y) };
+    let cords = { x: Math.floor(x), y: Math.floor(y) };
     return cords;
 }
 
 function relativeCordsApply(event) {
     let cords = relativeCords(event);
-    if(event.relCords==undefined) event.relCords=cords;
+    if (event.relCords == undefined) event.relCords = cords;
 }
 
 
@@ -422,7 +423,7 @@ function downloadFile(filename, text) {
 
 function importData(dt) {
     let data = JSON.parse(binaryDecode(dt));
-    
+
     basepoint = data.basepoint;
     objects = [];
     data.objects.forEach(element => {
@@ -478,17 +479,17 @@ function render() {
 
     objects.forEach(element => element.render(ctx));
 
-    if(cursor.enabled) {
-        ctx.strokeStyle="black";
+    if (cursor.enabled) {
+        ctx.strokeStyle = "black";
         ctx.lineWidth = 1;
-        
+
         ctx.beginPath();
-        ctx.moveTo(cursor.x-10,cursor.y);
-        ctx.lineTo(cursor.x+10,cursor.y);
+        ctx.moveTo(cursor.x - 10, cursor.y);
+        ctx.lineTo(cursor.x + 10, cursor.y);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(cursor.x,cursor.y-10);
-        ctx.lineTo(cursor.x,cursor.y+10);
+        ctx.moveTo(cursor.x, cursor.y - 10);
+        ctx.lineTo(cursor.x, cursor.y + 10);
         ctx.stroke();
     }
 }
@@ -544,12 +545,12 @@ const move = (x, y) => objects.forEach(element => element.move(x, y));
 
 canvas.addEventListener("mousemove", function (event) {
     relativeCordsApply(event);
-    const cords=event.relCords;
+    const cords = event.relCords;
 
-    cursor.x=cords.x;
-    cursor.y=cords.y;
+    cursor.x = cords.x;
+    cursor.y = cords.y;
 
-    if(!event.byCursor) cursor.enabled=false;
+    if (!event.byCursor) cursor.enabled = false;
 
     x_cord.innerHTML = cords.x;
     y_cord.innerHTML = cords.y;
@@ -578,7 +579,7 @@ canvas.addEventListener("mousemove", function (event) {
                 getStrokeColor(),
                 getFillColor(),
                 line_width.value
-            ); else if(tool.value=="ellipse") current_object=new Ellipse(
+            ); else if (tool.value == "ellipse") current_object = new Ellipse(
                 cords.x,
                 cords.y,
                 getStrokeColor(),
@@ -597,9 +598,9 @@ canvas.addEventListener("mousemove", function (event) {
                 current_object.ye = cords.y;
             } else if (current_object instanceof Circle) {
                 current_object.radius = getDistance(current_object.x, current_object.y, cords.x, cords.y);
-            } else if(current_object instanceof Ellipse) {
-                current_object.xe=cords.x;
-                current_object.ye=cords.y;
+            } else if (current_object instanceof Ellipse) {
+                current_object.xe = cords.x;
+                current_object.ye = cords.y;
             }
         }
     } else {
@@ -627,32 +628,32 @@ document.addEventListener("keypress", function (event) {
         if (removed instanceof Polygon) Polygon.polygons--;
         current_object = null;
     }
-    if(code=="KeyW") {
-        if(cursor.y>0) cursor.move(0,-1);
+    if (code == "KeyW") {
+        if (cursor.y > 0) cursor.move(0, -1);
     }
-    if(code=="KeyS") {
-        if(cursor.y<canvas.height) cursor.move(0,1);
+    if (code == "KeyS") {
+        if (cursor.y < canvas.height) cursor.move(0, 1);
     }
-    if(code=="KeyA") {
-        if(cursor.x>0) cursor.move(-1,0);
+    if (code == "KeyA") {
+        if (cursor.x > 0) cursor.move(-1, 0);
     }
-    if(code=="KeyD") {
-        if(cursor.x<canvas.width) cursor.move(1,0);
+    if (code == "KeyD") {
+        if (cursor.x < canvas.width) cursor.move(1, 0);
     }
-    if(code=="Enter") {
+    if (code == "Enter") {
         cursor.click();
     }
     render();
     compile_element();
 });
 
-document.addEventListener("keydown",function(event) {
-    const code=event.code;
-    if(code=="Enter") mouse_pressed=true;
+document.addEventListener("keydown", function (event) {
+    const code = event.code;
+    if (code == "Enter") mouse_pressed = true;
 });
-document.addEventListener("keyup",function(event) {
-    const code=event.code;
-    if(code=="Enter") mouse_pressed=false;
+document.addEventListener("keyup", function (event) {
+    const code = event.code;
+    if (code == "Enter") mouse_pressed = false;
 });
 
 canvas.addEventListener("click", function (event) {
@@ -698,5 +699,19 @@ load_f.addEventListener("change", function (event) {
         alert("Something went wrong...");
     });
 });
+
+const urlParams = new URLSearchParams(location.search);
+let file = urlParams.get("file");
+
+function loadFile(file) {
+    fetch(file)
+        .then(response => response.text())
+        .then(data => importData(data))
+        .catch(error => alert('Error loading file:', error));
+}
+
+if (file) {
+    loadFile(file);
+}
 
 render();
