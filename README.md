@@ -4,7 +4,7 @@ Characters editor for TXLib C++ Library, written in JavaScript.
 You can draw your character, configure it and then you get C++ function that drawes your character.
 
 ## Features
-- Primitives: Line, Rectangle, Circle and Polygon.
+- Primitives: Line, Rectangle, Circle, Epsilon and Polygon.
 - All points are been calculated from the exact basepoint you can select.
 - Transparent fill color/Color synchronization
 - Real-time code compilation
